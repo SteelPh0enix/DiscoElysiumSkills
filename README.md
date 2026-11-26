@@ -153,4 +153,4 @@ cp .omp/extensions/disco-elysium.ts ~/.omp/agent/extensions/
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
