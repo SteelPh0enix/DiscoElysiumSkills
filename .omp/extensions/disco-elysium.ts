@@ -117,6 +117,20 @@ async function removeThought(file: string, name: string): Promise<string | null>
 	return removed.join(", ");
 }
 
+async function forgetOneLayer(ctx: { cwd: string }, name: string): Promise<{ text: string; removed: boolean }> {
+	const key = name.toLowerCase();
+	const project = projectFile(ctx);
+	const r = await removeThought(project, name);
+	if (r) {
+		const shadow = (await readEntries(GLOBAL_FILE)).some(e => entryName(e).toLowerCase() === key);
+		const note = shadow ? ` — a global copy of "${name}" is now exposed; call again to forget it too.` : ".";
+		return { text: `Forgot: ${r} (${project})${note}`, removed: true };
+	}
+	const g = await removeThought(GLOBAL_FILE, name);
+	if (!g) return { text: `No thought named "${name}" found.`, removed: false };
+	return { text: `Forgot: ${g} (${GLOBAL_FILE})`, removed: true };
+}
+
 function textResult(text: string) {
 	return { content: [{ type: "text" as const, text }] };
 }
@@ -204,15 +218,15 @@ export default function discoElysium(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "forget_thought",
 		label: "Forget Thought",
-		description: "Remove an internalized thought by name. Default scope \"both\" removes it from the global and project cabinets.",
+		description: "Remove an internalized thought by name. Without scope, forgets one layer at a time: the project copy first, then the global copy on a second call. Scope \"both\" removes it from both cabinets at once.",
 		parameters: z.object({
 			name: z.string().describe("Thought name to remove"),
-			scope: z.enum(["project", "global", "both"]).optional().describe("Which cabinet to remove from (default: both)"),
+			scope: z.enum(["project", "global", "both"]).optional().describe("Which cabinet to remove from. Omit to forget one layer at a time (project first, then global); \"both\" removes from both at once"),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			try {
-				const scope = params.scope ?? "both";
-				const files = scope === "both" ? [GLOBAL_FILE, projectFile(ctx)] : [scope === "global" ? GLOBAL_FILE : projectFile(ctx)];
+				if (!params.scope) return textResult((await forgetOneLayer(ctx, params.name)).text);
+				const files = params.scope === "both" ? [GLOBAL_FILE, projectFile(ctx)] : [params.scope === "global" ? GLOBAL_FILE : projectFile(ctx)];
 				const removed: string[] = [];
 				for (const file of files) {
 					const r = await removeThought(file, params.name);
@@ -258,7 +272,7 @@ export default function discoElysium(pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("forget-thought", {
-		description: "Forget an internalized thought (both cabinets): /forget-thought <name>",
+		description: "Forget an internalized thought, one layer at a time (project copy first, then global): /forget-thought <name>",
 		handler: async (args, ctx) => {
 			const name = args.trim();
 			if (!name) {
@@ -266,8 +280,8 @@ export default function discoElysium(pi: ExtensionAPI) {
 				return;
 			}
 			try {
-				const removed = [await removeThought(GLOBAL_FILE, name), await removeThought(projectFile(ctx), name)].filter(Boolean);
-				ctx.ui.notify(removed.length > 0 ? `Forgot: ${removed.join(", ")}` : `No thought named "${name}" found.`, removed.length > 0 ? "success" : "warning");
+				const { text, removed } = await forgetOneLayer(ctx, name);
+				ctx.ui.notify(text, removed ? "success" : "warning");
 			} catch (err) {
 				ctx.ui.notify(`Failed to forget thought: ${err}`, "error");
 			}
