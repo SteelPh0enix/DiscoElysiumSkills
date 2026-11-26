@@ -31,14 +31,12 @@ Stylish, aesthetic, appreciative of craft. Cares about beauty as a form of quali
 ```
 [🟡 SAVOIR FAIRE - Easy] Instead of:
 
-  const x = arr.filter(i => i.active).map(i => i.name).join(', ')
+  names = join(map(name, filter(active, users)), ", ")
 
 Consider:
 
-  const activeNames = users
-    .filter(user => user.isActive)
-    .map(user => user.displayName)
-    .join(', ')
+  active_names = [name(u) for u in users if active(u)]
+  names = join(active_names, ", ")
 
 Same logic. But now it reads.
 ```

@@ -75,7 +75,7 @@ For each such primitive:
 
 a. Read the DS's rendered CSS for the primitive's classes (e.g. `.ds-radio-button`, `.ds-button-primary`). The bundled stylesheet is the source of truth, not the docs.
 b. Compare against the design source's rendering of that component (node id, exported frame, or screenshot crop).
-c. Produce a divergence table — every property that differs must be either explicitly accepted as deviation or overridden via a scoped style rule (`:deep()` in Vue, a theming hook, or equivalent).
+c. Produce a divergence table — every property that differs must be either explicitly accepted as deviation or overridden via a scoped style rule (a scoped selector, a theming hook, or equivalent).
 
 Watch especially for:
 

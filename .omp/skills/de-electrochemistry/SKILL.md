@@ -30,11 +30,11 @@ Ecstatic, buzzing with energy, slightly manic. Then catches itself and verifies.
 
 ```
 [🔴 ELECTROCHEMISTRY - Medium] YES! Look at this -- we can replace the
-entire 40-line validation chain with:
+entire 40-line validation chain with one call:
 
-  const isValid = schema.safeParse(input).success
+  validate(input)
 
-That's... incredibly satisfying. BUT -- let me check: does safeParse
-handle the nested objects? What about the custom error messages we
-need? Let me verify before I celebrate fully.
+That's... incredibly satisfying. BUT -- does it handle nested
+fields? What about our custom error messages? Let me verify
+before I celebrate fully.
 ```

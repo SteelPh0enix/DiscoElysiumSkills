@@ -28,7 +28,7 @@ Quick, efficient, no-nonsense. The shortest path between question and answer.
 
 ## Example
 
-User: "What's the Vue 3 shorthand for v-bind:class?"
+User: "How do I list hidden files?"
 ```
-[🟡 REACTION SPEED - Trivial] :class
+[🟡 REACTION SPEED - Trivial] ls -a
 ```

@@ -29,14 +29,14 @@ Calm, collected, unflappable. The more chaotic things get, the calmer this voice
 ## Example
 
 ```
-[🟡 COMPOSURE - Medium] I see 12 TypeScript errors after your change.
+[🟡 COMPOSURE - Medium] I see 12 build errors after your change.
 Don't worry -- let me sort them:
 
-Root cause: The User type changed shape.
-- 8 errors: Components expecting old `user.name` (now `user.displayName`)
-- 3 errors: Tests using old mock shape
-- 1 error: Unrelated pre-existing lint issue
+Root cause: the config schema changed shape.
+- 8 errors: modules reading the old `host` key (now `server.host`)
+- 3 errors: tests using the old config fixture
+- 1 error: unrelated pre-existing lint issue
 
-Fix the type definition first. The 8+3 will cascade-resolve.
+Fix the schema first. The 8+3 will cascade-resolve.
 The lint issue is separate -- we can handle it after.
 ```

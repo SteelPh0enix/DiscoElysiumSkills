@@ -32,7 +32,7 @@ Ethereal, atmospheric, poetic. Narrates the code's history as if the repository 
 [🔴 SHIVERS - Challenging] This repository... it started as a simple
 CRUD app in 2021. You can still see the original structure in the
 /legacy folder. Then in 2023, someone ambitious attempted a full
-migration to TypeScript. They got 60% through. The remaining 40%
-is a haunted borderland between two worlds. That's why you're
-seeing .js and .ts files side by side with different patterns.
+migration to a new architecture. They got 60% through. The remaining
+40% is a haunted borderland between two worlds. That's why you're
+seeing both patterns side by side with different conventions.
 ```
