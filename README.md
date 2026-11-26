@@ -1,10 +1,10 @@
-# Disco Elysium Skill System for Cursor
+# Disco Elysium Skill System for Oh-My-Pi
 
-Turn your Cursor AI agent into a multi-voiced collaborator inspired by *Disco Elysium's* 24-skill system. Each skill is an inner voice that activates contextually as you work -- arguing, warning, celebrating, and guiding.
+Turn your Oh-My-Pi agent into a multi-voiced collaborator inspired by *Disco Elysium's* 24-skill system. Each skill is an inner voice that activates contextually as you work -- arguing, warning, celebrating, and guiding.
 
 ## What This Is
 
-In Disco Elysium, your character has 24 skills that act as internal voices -- Logic reasons through problems, Empathy reads people, Authority pushes back, Inland Empire speaks in hunches. This project brings that system to Cursor's AI agent.
+In Disco Elysium, your character has 24 skills that act as internal voices -- Logic reasons through problems, Empathy reads people, Authority pushes back, Inland Empire speaks in hunches. This project brings that system to your Oh-My-Pi agent.
 
 When you're debugging, **Logic** fires and decomposes the problem into hypotheses. When you're about to commit a `.env` file, **Half Light** screams STOP. When code is ugly but needs reading, **Pain Threshold** pushes through. When a solution is elegant, **Electrochemistry** celebrates -- then reminds you to verify.
 
@@ -84,7 +84,7 @@ Multiple skills can fire simultaneously. A debugging session might trigger Logic
 
 ## Thought Cabinet
 
-The Thought Cabinet (`skills/de-thought-cabinet/SKILL.md`) lets you internalize persistent behavioral changes. Tell the agent to "internalize a thought" and it becomes a permanent modifier:
+The Thought Cabinet (`.omp/skills/de-thought-cabinet/SKILL.md`, managed by the `disco-elysium` extension) lets you internalize persistent behavioral changes. Tell the agent to "internalize a thought" and it becomes a permanent modifier:
 
 ```markdown
 ### The Fifteenth Indotribe
@@ -93,46 +93,62 @@ The Thought Cabinet (`skills/de-thought-cabinet/SKILL.md`) lets you internalize 
 - **Completion Effect**: Always ask "is there a simpler way?" before implementing.
 ```
 
+Active thoughts are injected into every prompt and stored merged in `~/.omp/agent/disco-elysium/thoughts.md` (global) and `.omp/disco-elysium/thoughts.md` (project). Manage them with `/thoughts`, `/internalize <name> | <problem> | <completion effect>`, `/forget-thought <name>`, or the `list_thoughts` / `internalize_thought` / `forget_thought` tools.
+
 ## Installation
 
-1. Copy the `skills/` folder into your `~/.cursor/skills/` directory:
+Native Oh-My-Pi (OMP) integration -- no plugin package needed.
 
-```bash
-cp -r skills/* ~/.cursor/skills/
+**Project use:** run `omp` from this repo's root. OMP auto-discovers `.omp/skills/*/SKILL.md` and `.omp/extensions/*.ts`, so there is nothing to copy.
+
+**User-global use (every project):** point `skills.customDirectories` at this repo's skills and install the extension into your agent directory:
+
+```yaml
+# ~/.omp/agent/config.yml
+skills:
+  customDirectories:
+    - /path/to/DiscoElysiumSkills/.omp/skills
 ```
 
-2. That's it. Cursor picks up skills automatically. The agent will read and activate them based on context.
+```bash
+cp .omp/extensions/disco-elysium.ts ~/.omp/agent/extensions/
+```
 
 ## Structure
 
 ```
-skills/
-├── de-system/SKILL.md              # Master system (read this first)
-├── de-thought-cabinet/SKILL.md     # Persistent behavioral changes
-├── de-logic/SKILL.md
-├── de-encyclopedia/SKILL.md
-├── de-rhetoric/SKILL.md
-├── de-drama/SKILL.md
-├── de-conceptualization/SKILL.md
-├── de-visual-calculus/SKILL.md
-├── de-volition/SKILL.md
-├── de-inland-empire/SKILL.md
-├── de-empathy/SKILL.md
-├── de-authority/SKILL.md
-├── de-esprit-de-corps/SKILL.md
-├── de-suggestion/SKILL.md
-├── de-endurance/SKILL.md
-├── de-pain-threshold/SKILL.md
-├── de-physical-instrument/SKILL.md
-├── de-electrochemistry/SKILL.md
-├── de-shivers/SKILL.md
-├── de-half-light/SKILL.md
-├── de-hand-eye/SKILL.md
-├── de-perception/SKILL.md
-├── de-reaction-speed/SKILL.md
-├── de-savoir-faire/SKILL.md
-├── de-interfacing/SKILL.md
-└── de-composure/SKILL.md
+.omp/
+├── skills/
+│   ├── de-system/SKILL.md              # Master system (read this first)
+│   ├── de-thought-cabinet/
+│   │   ├── SKILL.md                    # Persistent behavioral changes
+│   │   └── thoughts.md                 # Seed for the first-run global cabinet
+│   ├── de-logic/SKILL.md
+│   ├── de-encyclopedia/SKILL.md
+│   ├── de-rhetoric/SKILL.md
+│   ├── de-drama/SKILL.md
+│   ├── de-conceptualization/SKILL.md
+│   ├── de-visual-calculus/SKILL.md
+│   ├── de-volition/SKILL.md
+│   ├── de-inland-empire/SKILL.md
+│   ├── de-empathy/SKILL.md
+│   ├── de-authority/SKILL.md
+│   ├── de-esprit-de-corps/SKILL.md
+│   ├── de-suggestion/SKILL.md
+│   ├── de-endurance/SKILL.md
+│   ├── de-pain-threshold/SKILL.md
+│   ├── de-physical-instrument/SKILL.md
+│   ├── de-electrochemistry/SKILL.md
+│   ├── de-shivers/SKILL.md
+│   ├── de-half-light/SKILL.md
+│   ├── de-hand-eye/SKILL.md
+│   ├── de-perception/SKILL.md
+│   ├── de-reaction-speed/SKILL.md
+│   ├── de-savoir-faire/SKILL.md
+│   ├── de-interfacing/SKILL.md
+│   └── de-composure/SKILL.md
+└── extensions/
+    └── disco-elysium.ts                # Voice injection + thought cabinet (/thoughts, /internalize, /forget-thought)
 ```
 
 ## License

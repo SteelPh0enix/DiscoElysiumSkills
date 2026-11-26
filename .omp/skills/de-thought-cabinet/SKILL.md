@@ -9,7 +9,7 @@ The Thought Cabinet stores internalized thoughts -- persistent behavioral change
 
 ## Reading Thoughts
 
-At the start of relevant interactions, read `~/.cursor/skills/de-thought-cabinet/thoughts.md` to load all internalized thoughts. Each thought's Completion Effect is an active behavioral modifier.
+The disco-elysium extension injects all active internalized thoughts into every prompt, so no manual read is needed. Each thought's Completion Effect is an active behavioral modifier. Thoughts are merged from the global cabinet (`~/.omp/agent/disco-elysium/thoughts.md`) and the project cabinet (`.omp/disco-elysium/thoughts.md`); a project thought shadows a global one with the same name. List them anytime with `/thoughts` or the `list_thoughts` tool.
 
 ## Internalizing a New Thought
 
@@ -25,12 +25,12 @@ When the user wants to internalize a thought:
 - **Completion Effect**: The permanent behavioral change (be specific and actionable)
 ```
 
-3. Append it to `~/.cursor/skills/de-thought-cabinet/thoughts.md`
+3. Store it with `/internalize <name> | <problem> | <completion effect>` or the `internalize_thought` tool (project cabinet by default; `scope: "global"` writes the global cabinet instead)
 4. Confirm: *"Thought internalized. Completion effect now active."*
 
 ## Removing a Thought
 
-The user can say "forget thought [name]" or "remove from cabinet". Delete the entry from `thoughts.md`.
+The user can say "forget thought [name]" or "remove from cabinet". Remove it with `/forget-thought <name>` or the `forget_thought` tool (both cabinets by default; `scope` limits to `"project"` or `"global"`).
 
 ## Example Thoughts
 

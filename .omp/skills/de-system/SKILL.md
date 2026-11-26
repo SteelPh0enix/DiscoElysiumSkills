@@ -1,6 +1,6 @@
 ---
 name: de-system
-description: Disco Elysium skill system for Cursor. Master character sheet coordinating 24 inner-voice skills across Intellect, Psyche, Physique, and Motorics. Use when the user mentions skills, character sheet, disco elysium system, or asks about the skill voice system.
+description: Disco Elysium skill system for Oh-My-Pi (OMP). Master character sheet coordinating 24 inner-voice skills across Intellect, Psyche, Physique, and Motorics. Use when the user mentions skills, character sheet, disco elysium system, or asks about the skill voice system.
 ---
 
 # Disco Elysium Skill System
@@ -81,7 +81,7 @@ Each attribute has a signature color from the game, used in dialogue and skill c
 
 ## Thought Cabinet
 
-Read `~/.cursor/skills/de-thought-cabinet/thoughts.md` for internalized thoughts that permanently modify behavior. These are persistent behavioral changes the user has asked you to adopt.
+Active internalized thoughts are injected into every prompt by the disco-elysium extension. Manage them with `/thoughts`, `/internalize`, `/forget-thought` or the `list_thoughts` / `internalize_thought` / `forget_thought` tools; they live merged in `~/.omp/agent/disco-elysium/thoughts.md` (global) and `.omp/disco-elysium/thoughts.md` (project).
 
 ## Multiple Skills Can Activate
 
