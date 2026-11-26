@@ -142,6 +142,8 @@ export default function discoElysium(pi: ExtensionAPI) {
 			}
 			await fs.mkdir(path.dirname(GLOBAL_FILE), { recursive: true });
 			await fs.copyFile(seed, GLOBAL_FILE);
+			// Nix store seeds are read-only and copyFile preserves that mode; the cabinet must stay writable.
+			await fs.chmod(GLOBAL_FILE, 0o644);
 		} catch (err) {
 			pi.logger.error(`[disco-elysium] failed to seed global thought cabinet: ${err}`);
 		}
