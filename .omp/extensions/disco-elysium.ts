@@ -5,7 +5,23 @@ import path from "node:path";
 
 const agentDir = process.env.PI_CODING_AGENT_DIR ?? path.join(os.homedir(), ".omp", "agent");
 const GLOBAL_FILE = path.join(agentDir, "disco-elysium", "thoughts.md");
-const SEED_FILE = path.join(import.meta.dir, "..", "skills", "de-thought-cabinet", "thoughts.md");
+// Project layout keeps skills/ next to extensions/; a user-global install links the pack's skills/ into the agent dir.
+const SEED_CANDIDATES = [
+	path.join(import.meta.dir, "..", "skills", "de-thought-cabinet", "thoughts.md"),
+	path.join(agentDir, "skills", "de-thought-cabinet", "thoughts.md"),
+];
+
+async function findSeedFile(): Promise<string | null> {
+	for (const candidate of SEED_CANDIDATES) {
+		try {
+			await fs.access(candidate);
+			return candidate;
+		} catch {
+			// try the next candidate
+		}
+	}
+	return null;
+}
 const FILE_HEADER = `# Thought Cabinet - Internalized Thoughts
 
 *These thoughts permanently modify behavior. Each Completion Effect is active.*
@@ -119,8 +135,13 @@ export default function discoElysium(pi: ExtensionAPI) {
 			// not seeded yet
 		}
 		try {
+			const seed = await findSeedFile();
+			if (!seed) {
+				pi.logger.warn("[disco-elysium] no seed thoughts.md found, skipping global cabinet seeding");
+				return;
+			}
 			await fs.mkdir(path.dirname(GLOBAL_FILE), { recursive: true });
-			await fs.copyFile(SEED_FILE, GLOBAL_FILE);
+			await fs.copyFile(seed, GLOBAL_FILE);
 		} catch (err) {
 			pi.logger.error(`[disco-elysium] failed to seed global thought cabinet: ${err}`);
 		}
