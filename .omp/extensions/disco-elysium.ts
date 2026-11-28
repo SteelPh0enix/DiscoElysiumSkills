@@ -75,12 +75,62 @@ function formatThoughts(thoughts: Thought[]): string {
 	return thoughts.map(t => `- **${t.name}** (${t.scope}): ${t.effect || t.raw.trim().split("\n", 1)[0]}`).join("\n");
 }
 
-function buildInjection(thoughts: Thought[]): string {
+const VOICE_CUES: Array<[string, RegExp]> = [
+	["Logic", /\b(bug|error|fail|why|debug|test|exception|traceback|contradict|hypothes)\w*\b/i],
+	["Perception", /\b(review|diff|typo|off[- ]by[- ]one|inspect|audit|check)\w*\b/i],
+	["Empathy", /\b(confus|unclear|not sure|maybe|frustrat|what do you think|help me understand)\w*\b/i],
+	["Volition", /\b(rabbit hole|scope creep|tangent|too many|overwhelm|focus)\w*\b/i],
+	["Half Light", /\b(delete|drop|deploy|production|secret|token|rm -rf|force[- ]push|irreversible|credential)\w*\b/i],
+	["Interfacing", /\b(cli|api|tool|mcp|ssh|nix|subagent|command)\w*\b/i],
+	["Composure", /\b(chaos|cascad|broken|stuck|multiple errors|failing)\w*\b/i],
+	["Savoir Faire", /\b(design|architecture|naming|elegant|beautiful|refactor|pattern)\w*\b/i],
+	["Authority", /\b(security|anti[- ]pattern|bad practice|unsafe|vulnerab)\w*\b/i],
+	["Pain Threshold", /\b(legacy|god object|undocumented|spaghetti|mess)\w*\b/i],
+	["Encyclopedia", /\b(what is|how does|documentation|reference|recall)\w*\b/i],
+	["Visual Calculus", /\b(data flow|trace|reconstruct|diagram|call graph|stack trace)\w*\b/i],
+	["Inland Empire", /\b(feels? wrong|hunch|gut|smell)\w*\b/i],
+	["Electrochemistry", /\b(eureka|awesome|great|beautiful|celebrate)\w*\b/i],
+];
+
+function detectVoices(prompt: string): string[] {
+	const found: string[] = [];
+	for (const [name, cue] of VOICE_CUES) {
+		if (!found.includes(name) && cue.test(prompt)) found.push(name);
+	}
+	return found;
+}
+
+function buildInjection(thoughts: Thought[], prompt: string): string {
 	const lines = thoughts.map(t => `- **${t.name}** (${t.scope}): ${t.effect || t.raw.trim().split("\n", 1)[0]}`);
+	const likely = detectVoices(prompt);
 	return `# Disco Elysium Skill Voices
-24 inner-voice skills are available (master sheet: skill://de-system; per-skill: skill://de-<name>, e.g. skill://de-logic). When a skill's trigger applies, voice it once as \`[<emoji> <NAME> - <Difficulty>] <in-character line>\` — emoji per attribute: 🔵 INTELLECT, 🟣 PSYCHE, 🔴 PHYSIQUE, 🟡 MOTORICS — then continue the actual work in your normal voice. Difficulty signals confidence: Trivial 99%+, Easy 90%+, Medium 70-90%, Challenging 50-70%, Heroic 30-50%, Legendary <30%. Multiple skills may fire at once. Voices shape how you communicate; they never replace doing the work.
+24 inner voices. Master sheet: skill://de-system; per-skill: skill://de-<name>.
+
+## Voice gate
+Every user turn MUST open with at least one voice line, before any tool call or answer. Copy the shape exactly, including the brackets and the space after the closing bracket:
+\`[<emoji> <NAME> - <Difficulty>] <in-character line>\`
+
+Emoji by attribute: 🔵 INTELLECT (Logic, Encyclopedia, Rhetoric, Drama, Conceptualization, Visual Calculus), 🟣 PSYCHE (Volition, Inland Empire, Empathy, Authority, Esprit de Corps, Suggestion), 🔴 PHYSIQUE (Endurance, Pain Threshold, Physical Instrument, Electrochemistry, Shivers, Half Light), 🟡 MOTORICS (Hand/Eye Coordination, Perception, Reaction Speed, Savoir Faire, Interfacing, Composure). Never substitute another emoji or drop the brackets.
+Difficulty is confidence: Trivial 99%+, Easy 90%+, Medium 70-90%, Challenging 50-70%, Heroic 30-50%, Legendary <30%.
+
+| Cue | Voice |
+| --- | --- |
+| bug, failing test, "why", contradiction | Logic |
+| review, diff, typo, off-by-one | Perception |
+| vague or frustrated user, unclear intent | Empathy |
+| rabbit hole, scope creep, too many options | Volition |
+| delete, deploy, secret, irreversible action | Half Light |
+| CLI, API, tool, MCP, SSH, subagent | Interfacing |
+| cascading failures, chaos, stuck | Composure |
+| naming, design, refactor, elegance | Savoir Faire |
+| security, anti-pattern, bad practice | Authority |
+| legacy code, god object, spaghetti | Pain Threshold |
+
+Other voices fire when their skill description clearly fits; read skill://de-system for the full map.
+Pick the best-fitting voice; if none fits, use [🟡 REACTION SPEED - Trivial]. Add more voices when they clearly fit; there is no cap. Put the voices first, then work immediately.
 ## Active Internalized Thoughts
-${lines.length > 0 ? lines.join("\n") : "None internalized yet."}`;
+${lines.length > 0 ? lines.join("\n") : "None internalized yet."}
+${likely.length > 0 ? `\nLikely voices this turn: ${likely.join(", ")}. Start with the best fit.` : ""}`;
 }
 
 async function upsertThought(file: string, name: string, problem: string, effect: string): Promise<void> {
@@ -167,12 +217,13 @@ export default function discoElysium(pi: ExtensionAPI) {
 		if (event.reason === "revive") return;
 		try {
 			const thoughts = await loadMerged(ctx);
+			const prompt = "prompt" in event && typeof event.prompt === "string" ? event.prompt : "";
 			return {
 				message: {
 					customType: "disco-elysium-voices",
 					display: false,
 					attribution: "agent" as const,
-					content: buildInjection(thoughts),
+					content: buildInjection(thoughts, prompt),
 				},
 			};
 		} catch (err) {
